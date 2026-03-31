@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Game Changer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #1e1e1e;
+      color: #ffffff;
+    }
+    h1 { color: #f39c12; }
+    #results {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #444;
+      background-color: #2d2d2d;
+      border-radius: 5px;
+      font-size: 18px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #f39c12;
+      color: #000;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    button:hover { background-color: #d68910; }
+  </style>
+</head>
+<body>
+<h1>Game Changer</h1>
+<p>Symulator starć w Eclipse: Drugi Świt Galaktyki.</p>
+<button onclick="runMonteCarlo()">Uruchom Symulację (10 000 bitew)</button>
+
+<div id="results">Kliknij przycisk, aby rozpocząć...</div>
+
+<script src="simulator.js"></script>
+</body>
+</html>
