@@ -1,7 +1,6 @@
-// Klasa definiująca statki
-class Ship {
-    constructor(name, hp, initiative, computer, shield, damage) {
-        this.name = name;
+// Klasa bazowa statku
+class ShipStats {
+    constructor(hp, initiative, computer, shield, damage) {
         this.hp = hp;
         this.initiative = initiative;
         this.computer = computer;
@@ -10,78 +9,104 @@ class Ship {
     }
 }
 
-// Funkcja symulująca rzut kością (1-6)
+// Funkcja rzutu kością
 function rollDie() {
     return Math.floor(Math.random() * 6) + 1;
 }
 
-// Funkcja symulująca pojedynek dwóch statków
-function simulateDuel(ship1, ship2) {
-    let s1 = { ...ship1 };
-    let s2 = { ...ship2 };
+// Funkcja symulująca bitwę wielu statków (Flota vs Flota)
+function simulateBattle(countA, statsA, countB, statsB) {
+    // Tworzenie konkretnych statków dla tej jednej bitwy
+    let fleetA = Array.from({ length: countA }, () => ({ ...statsA }));
+    let fleetB = Array.from({ length: countB }, () => ({ ...statsB }));
 
-    let attacker = s1.initiative > s2.initiative ? s1 : s2;
-    let defender = s1.initiative > s2.initiative ? s2 : s1;
+    // Walka trwa dopóki obie floty mają statki
+    while (fleetA.length > 0 && fleetB.length > 0) {
 
-    while (s1.hp > 0 && s2.hp > 0) {
-        let roll = rollDie();
-        let isHit = false;
+        // Zbieramy wszystkie ocalałe statki i przypisujemy im stronę konfliktu
+        let turnOrder = [];
+        fleetA.forEach(s => turnOrder.push({ ship: s, side: 'A' }));
+        fleetB.forEach(s => turnOrder.push({ ship: s, side: 'B' }));
 
-        if (roll === 6) {
-            isHit = true;
-        } else if (roll === 1) {
-            isHit = false;
-        } else {
-            let hitResult = roll + attacker.computer - defender.shield;
-            if (hitResult >= 6) {
+        // Sortowanie statków malejąco po Inicjatywie (najszybsi strzelają pierwsi)
+        turnOrder.sort((a, b) => b.ship.initiative - a.ship.initiative);
+
+        // Wykonujemy ataki w ustalonej kolejności
+        for (let unit of turnOrder) {
+            // Jeśli statek zginął wcześniej w tej rundzie, nie może już strzelić
+            if (unit.ship.hp <= 0) continue;
+
+            let enemies = unit.side === 'A' ? fleetB : fleetA;
+            if (enemies.length === 0) break; // Przeciwnik zniszczony całkowicie
+
+            // Celujemy zawsze w pierwszy dostępny statek przeciwnika (najprostsza taktyka)
+            let target = enemies[0];
+
+            let roll = rollDie();
+            let isHit = false;
+
+            // Logika trafień
+            if (roll === 6) {
                 isHit = true;
+            } else if (roll === 1) {
+                isHit = false;
+            } else {
+                let hitResult = roll + unit.ship.computer - target.shield;
+                if (hitResult >= 6) isHit = true;
+            }
+
+            // Zadawanie obrażeń
+            if (isHit) {
+                target.hp -= unit.ship.damage;
+                if (target.hp <= 0) {
+                    enemies.shift(); // Usuwa zniszczony statek z początku tablicy wroga
+                }
             }
         }
-
-        if (isHit) {
-            defender.hp -= attacker.damage;
-        }
-
-        if (defender.hp <= 0) break;
-
-        let temp = attacker;
-        attacker = defender;
-        defender = temp;
     }
 
-    return s1.hp > 0 ? s1.name : s2.name;
+    // Zwracamy, kto przetrwał (A czy B)
+    return fleetA.length > 0 ? 'A' : 'B';
 }
 
-// Główna funkcja metody Monte Carlo
+// Pobieranie wartości z inputów na stronie
+function getVal(id) {
+    return parseInt(document.getElementById(id).value) || 0;
+}
+
+// Główna funkcja uruchamiająca silnik Game Changer
 function runMonteCarlo() {
-    // Pobieramy element ze strony, do którego wrzucimy wyniki
     const resultsDiv = document.getElementById("results");
-    resultsDiv.innerHTML = "Obliczam...";
+    resultsDiv.innerHTML = "Przeliczanie w toku...";
 
-    const interceptorA = new Ship("Standardowy Myśliwiec", 1, 2, 0, 0, 1);
-    const interceptorB = new Ship("Myśliwiec z Komputerem (+1)", 1, 2, 1, 0, 1);
+    // Ułamek sekundy przerwy, aby przeglądarka zdążyła pokazać napis "Przeliczanie..."
+    setTimeout(() => {
+        // Zbieranie danych Floty A
+        const countA = getVal('a-count');
+        const statsA = new ShipStats(getVal('a-hp'), getVal('a-init'), getVal('a-comp'), getVal('a-shield'), getVal('a-dmg'));
 
-    const simulations = 10000;
-    let winsA = 0;
-    let winsB = 0;
+        // Zbieranie danych Floty B
+        const countB = getVal('b-count');
+        const statsB = new ShipStats(getVal('b-hp'), getVal('b-init'), getVal('b-comp'), getVal('b-shield'), getVal('b-dmg'));
 
-    for (let i = 0; i < simulations; i++) {
-        let winner = simulateDuel(interceptorA, interceptorB);
-        if (winner === interceptorA.name) {
-            winsA++;
-        } else {
-            winsB++;
+        const simulations = 10000;
+        let winsA = 0;
+        let winsB = 0;
+
+        // Główna pętla Monte Carlo
+        for (let i = 0; i < simulations; i++) {
+            let winner = simulateBattle(countA, statsA, countB, statsB);
+            if (winner === 'A') winsA++;
+            else winsB++;
         }
-    }
 
-    // Obliczanie procentów
-    const percentA = (winsA / simulations * 100).toFixed(2);
-    const percentB = (winsB / simulations * 100).toFixed(2);
+        const percentA = (winsA / simulations * 100).toFixed(1);
+        const percentB = (winsB / simulations * 100).toFixed(1);
 
-    // Wyświetlanie wyników na stronie
-    resultsDiv.innerHTML = `
-        <p>Przeprowadzono bitew: <strong>${simulations}</strong></p>
-        <p style="color: #ff6b6b;">${interceptorA.name} wygrał: <strong>${percentA}%</strong></p>
-        <p style="color: #4cd137;">${interceptorB.name} wygrał: <strong>${percentB}%</strong></p>
-    `;
+        resultsDiv.innerHTML = `
+            <p>Rozegrano <strong>${simulations.toLocaleString()}</strong> symulacji.</p>
+            <p style="color: #ff6b6b; font-size: 24px;">Flota A wygrała: <strong>${percentA}%</strong></p>
+            <p style="color: #4cd137; font-size: 24px;">Flota B wygrała: <strong>${percentB}%</strong></p>
+        `;
+    }, 50);
 }
