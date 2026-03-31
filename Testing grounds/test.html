@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Game Changer</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #1e1e1e; color: #ffffff; max-width: 900px; margin: auto; }
+    h1 { color: #f39c12; text-align: center; margin-bottom: 5px; }
+    .subtitle { text-align: center; color: #888; margin-bottom: 20px; }
+    .container { display: flex; gap: 20px; justify-content: space-between; }
+    .fleet-panel { background-color: #2d2d2d; padding: 20px; border: 1px solid #444; border-radius: 8px; flex: 1; }
+    .fleet-a h2 { color: #ff6b6b; margin-top: 0;}
+    .fleet-b h2 { color: #4cd137; margin-top: 0;}
+    .form-group { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
+    input { width: 50px; padding: 5px; background-color: #1e1e1e; color: white; border: 1px solid #666; border-radius: 4px; text-align: center; }
+    .controls { text-align: center; margin: 25px 0; display: flex; justify-content: center; gap: 10px; }
+    button { padding: 12px 20px; font-size: 16px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; transition: 0.2s; }
+    .btn-main { background-color: #f39c12; color: #000; }
+    .btn-main:hover { background-color: #d68910; }
+    .btn-log { background-color: #444; color: #fff; }
+    .btn-log:hover { background-color: #555; }
+    #results, #battle-log { padding: 15px; border: 1px solid #444; background-color: #2d2d2d; border-radius: 5px; margin-top: 10px; }
+    #battle-log { font-family: 'Courier New', monospace; font-size: 13px; max-height: 300px; overflow-y: auto; text-align: left; display: none; }
+    .log-entry { margin-bottom: 4px; border-bottom: 1px solid #333; padding-bottom: 2px; }
+    .log-hit { color: #4cd137; }
+    .log-miss { color: #ff6b6b; }
+    .log-death { color: #f39c12; font-weight: bold; }
+  </style>
+</head>
+<body>
+<h1>Game Changer</h1>
+<div class="subtitle">Symulator bitew 4X</div>
+
+<div class="container">
+  <div class="fleet-panel fleet-a">
+    <h2>Flota A</h2>
+    <div class="form-group"><label>Liczba statków:</label> <input type="number" id="a-count" value="1"></div>
+    <hr style="border-color: #444;">
+    <div class="form-group"><label>HP (Wytrzymałość):</label> <input type="number" id="a-hp" value="1"></div>
+    <div class="form-group"><label>Inicjatywa:</label> <input type="number" id="a-init" value="2"></div>
+    <div class="form-group"><label>Komputer (+):</label> <input type="number" id="a-comp" value="0"></div>
+    <div class="form-group"><label>Tarcze (-):</label> <input type="number" id="a-shield" value="0"></div>
+    <div class="form-group"><label>Liczba kości (dział):</label> <input type="number" id="a-dice" value="1"></div>
+    <div class="form-group"><label>Dmg na kostkę:</label> <input type="number" id="a-dmg" value="1"></div>
+  </div>
+
+  <div class="fleet-panel fleet-b">
+    <h2>Flota B</h2>
+    <div class="form-group"><label>Liczba statków:</label> <input type="number" id="b-count" value="1"></div>
+    <hr style="border-color: #444;">
+    <div class="form-group"><label>HP (Wytrzymałość):</label> <input type="number" id="b-hp" value="1"></div>
+    <div class="form-group"><label>Inicjatywa:</label> <input type="number" id="b-init" value="2"></div>
+    <div class="form-group"><label>Komputer (+):</label> <input type="number" id="b-comp" value="1"></div>
+    <div class="form-group"><label>Tarcze (-):</label> <input type="number" id="b-shield" value="0"></div>
+    <div class="form-group"><label>Liczba kości (dział):</label> <input type="number" id="b-dice" value="1"></div>
+    <div class="form-group"><label>Dmg na kostkę:</label> <input type="number" id="b-dmg" value="1"></div>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="btn-main" onclick="runMonteCarlo()">Symuluj 10 000 bitew</button>
+  <button class="btn-log" onclick="showExampleBattle()">Pokaż przebieg jednej bitwy</button>
+</div>
+
+<div id="results">Wyniki symulacji...</div>
+<div id="battle-log"></div>
+
+<script src="test2.js"></script>
+</body>
+</html>
